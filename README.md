@@ -13,4 +13,7 @@ Run tests with
 `go test <path>/sample-go/tests`
 
 ## Previous
-Install dependency `golang-migrate` to create migrations
+Install dependency `golang-migrate` to create migrations. 
+For create new migration:
+
+`migrate create -ext sql -dir migrate/versions -seq <name for migration>`
