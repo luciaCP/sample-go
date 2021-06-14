@@ -2,10 +2,14 @@ package services
 
 import (
 	"database/sql"
-	"fmt"
 )
 
-func Increase(db *sql.DB) {
+type incrementalDto struct {
+	Id int
+	Incremental int
+}
+
+func Increase(db *sql.DB) int {
 	sqlStatement := `
 		INSERT INTO go_test (incremental)
 		VALUES ($1)
@@ -15,6 +19,7 @@ func Increase(db *sql.DB) {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("New record ID is:", id)
+
+	return id
 }
 

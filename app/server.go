@@ -15,12 +15,8 @@ func pingController(c *gin.Context) {
 }
 
 func incrementController(c *gin.Context) {
-	if err := CurrentApp.DbConnection.Ping() ; err != nil {
-		fmt.Printf("Ups! Couldn't connect to DB on Restore - %s\n\n", err)
-	}
-
-	services.Increase(CurrentApp.DbConnection)
-	c.String(201, "dummy response")
+	createdId := services.Increase(CurrentApp.DbConnection)
+	c.JSON(201, gin.H{"id": createdId})
 }
 
 type App struct {
