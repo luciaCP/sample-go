@@ -6,7 +6,15 @@ import (
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
+	"os"
+	"strings"
 )
+
+func getFilePath() string {
+	workingDirectoryPath, _ := os.Getwd()
+	absPath := strings.Split(workingDirectoryPath, "sample-go")
+	return fmt.Sprintf("file://%s/sample-go/migrate/versions", absPath[0])
+}
 
 func getMigrateInstance(db *sql.DB) (*migrate.Migrate, error) {
 	defer func() {
@@ -16,8 +24,7 @@ func getMigrateInstance(db *sql.DB) (*migrate.Migrate, error) {
 	}()
 
 	driver, _ := postgres.WithInstance(db, &postgres.Config{})
-	return migrate.NewWithDatabaseInstance(
-		"file://migrate/versions", "postgres", driver)
+	return migrate.NewWithDatabaseInstance(getFilePath(), "postgres", driver)
 }
 
 func Up(db *sql.DB) error {

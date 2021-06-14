@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	_ "github.com/lib/pq"
 	"sample-go/app/services"
 	"sample-go/migrate"
 )
@@ -14,17 +15,17 @@ func pingController(c *gin.Context) {
 }
 
 func incrementController(c *gin.Context) {
-	if err := CurrentApp.dbConnection.Ping() ; err != nil {
+	if err := CurrentApp.DbConnection.Ping() ; err != nil {
 		fmt.Printf("Ups! Couldn't connect to DB on Restore - %s\n\n", err)
 	}
 
-	services.Increase(CurrentApp.dbConnection)
+	services.Increase(CurrentApp.DbConnection)
 	c.String(201, "dummy response")
 }
 
 type App struct {
-	dbConnection *sql.DB
-	Engine *gin.Engine
+	DbConnection *sql.DB
+	Engine       *gin.Engine
 }
 
 func (app *App) InitServer() {
@@ -55,7 +56,7 @@ func (app *App) InitDb(uriDB string) {
 		fmt.Printf("Ups! Couldn't migrate DB - %s\n\n", err)
 	}
 
-	app.dbConnection = db
+	app.DbConnection = db
 }
 
 func (app *App) Run(addr ...string) error {
@@ -63,24 +64,24 @@ func (app *App) Run(addr ...string) error {
 }
 
 func (app *App) FlushDb() error {
-	if err := app.dbConnection.Ping() ; err != nil {
+	if err := app.DbConnection.Ping() ; err != nil {
 		fmt.Printf("Ups! Couldn't connect to DB on Flush - %s\n\n", err)
 		return err
 	}
 
-	return migrate.Down(app.dbConnection)
+	return migrate.Down(app.DbConnection)
 }
 
 func (app *App) RestoreDb() error {
-	if err := app.dbConnection.Ping() ; err != nil {
+	if err := app.DbConnection.Ping() ; err != nil {
 		fmt.Printf("Ups! Couldn't connect to DB on Restore - %s\n\n", err)
 		return err
 	}
 
-	return migrate.Up(app.dbConnection)
+	return migrate.Up(app.DbConnection)
 }
 
 func (app *App) Close() error {
-	migrate.Down(app.dbConnection)
-	return app.dbConnection.Close()
+	migrate.Down(app.DbConnection)
+	return app.DbConnection.Close()
 }

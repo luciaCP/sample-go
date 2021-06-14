@@ -9,12 +9,11 @@ import (
 )
 
 func TestPing(t *testing.T)  {
-	app := app.App{}
-	app.InitServer()
+	app.CurrentApp.InitServer()
 
 	writer := httptest.NewRecorder()
 	req, err := http.NewRequest("GET", "/ping", nil)
-	app.Engine.ServeHTTP(writer, req)
+	app.CurrentApp.Engine.ServeHTTP(writer, req)
 
 	assert.Nil(t, err)
 	assert.Equal(t, 200, writer.Code)
