@@ -1,7 +1,7 @@
 package services
 
 import (
-	"database/sql"
+	"sample-go/app/config"
 )
 
 type incrementalDto struct {
@@ -9,7 +9,8 @@ type incrementalDto struct {
 	Incremental int
 }
 
-func Increase(db *sql.DB) int {
+func Increase() int {
+	db := config.Connections.GetConnection()
 	sqlStatement := `
 		INSERT INTO go_test (incremental)
 		VALUES ($1)

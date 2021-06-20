@@ -7,24 +7,25 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"sample-go/app"
+	"sample-go/app/config"
 	"testing"
 )
 
 func TestMain(m *testing.M)  {
 	app.CurrentApp.InitServer()
-	app.CurrentApp.InitDb("postgresql://postgres@0.0.0.0:5432/go_test?sslmode=disable")
+	config.Connections.InitDb("postgresql://postgres@0.0.0.0:5432/go_test?sslmode=disable")
 	m.Run()
 }
 
 func setUp() {
-	err := app.CurrentApp.RestoreDb()
+	err := config.Connections.RestoreDb()
 	if err != nil {
 		fmt.Println(err)
 	}
 }
 
 func tearDown() {
-	err := app.CurrentApp.FlushDb()
+	err := config.Connections.FlushDb()
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -42,7 +43,7 @@ func TestIncrementOne(t *testing.T) {
 	assert.Equal(t, 201, writer.Code)
 
 	var identifier, amount int
-	app.CurrentApp.DbConnection.QueryRow("SELECT id, incremental FROM go_test").Scan(&identifier, &amount)
+	config.Connections.GetConnection().QueryRow("SELECT id, incremental FROM go_test").Scan(&identifier, &amount)
 	assert.Equal(t, 1, amount)
 
 	var response map[string]int
@@ -75,7 +76,7 @@ func TestIncrementTwo(t *testing.T) {
 	json.Unmarshal([]byte(writer2.Body.String()), &secondResponse)
 
 
-	selectionDd, _ := app.CurrentApp.DbConnection.Query("SELECT id, incremental FROM go_test")
+	selectionDd, _ := config.Connections.GetConnection().Query("SELECT id, incremental FROM go_test")
 	for i:=0; selectionDd.Next() ; i++ {
 		var identifier, amount int
 		selectionDd.Scan(&identifier, &amount)
