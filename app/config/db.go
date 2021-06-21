@@ -7,12 +7,13 @@ import (
 	"sample-go/migrate"
 )
 
-type ConfigApp struct {
-	db     *sql.DB
-	dbName string
+type DbConnection interface {
+	InitDb(uriDB string, dbName string)
+	GetConnection() *sql.DB
+	FlushDb() error
+	RestoreDb() error
+	Close() error
 }
-
-var Connections = ConfigApp{}
 
 func (config *ConfigApp) InitDb(uriDB string, dbName string) {
 	defer func() {
