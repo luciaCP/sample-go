@@ -5,14 +5,14 @@ import (
 	"sample-go/app/models"
 )
 
-func CreateIncrease() int {
+func CreateIncrease(amount int) int {
 	db := config.Connections.GetConnection()
 	sqlStatement := `
 		INSERT INTO go_test (incremental)
 		VALUES ($1)
 		RETURNING id`
 	var id int
-	err := db.QueryRow(sqlStatement, 1).Scan(&id)
+	err := db.QueryRow(sqlStatement, amount).Scan(&id)
 	if err != nil {
 		panic(err)
 	}

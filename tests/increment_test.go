@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/stretchr/testify/assert"
@@ -32,12 +33,15 @@ func tearDown() {
 	}
 }
 
-func TestIncrementOne(t *testing.T) {
+func TestCreateIncrementSaveOnDbWithAmountValue(t *testing.T) {
 	defer tearDown()
 	setUp()
 
+	expectedAmount := 3
+//	bodyRequest := []byte(fmt.Sprintf("%v", map[string]int{"amount": expectedAmount}))
+	bodyRequest := []byte("{\"amount\":3}")
 	writer := httptest.NewRecorder()
-	req, err := http.NewRequest("POST", "/increment", nil)
+	req, err := http.NewRequest("POST", "/increment", bytes.NewBuffer(bodyRequest))
 	app.CurrentApp.Engine.ServeHTTP(writer, req)
 
 	assert.Nil(t, err)
@@ -46,7 +50,7 @@ func TestIncrementOne(t *testing.T) {
 	var identifier, amount int
 	var upgraded bool
 	config.Connections.GetConnection().QueryRow("SELECT * FROM go_test").Scan(&identifier, &amount, &upgraded)
-	assert.Equal(t, 1, amount)
+	assert.Equal(t, expectedAmount, amount)
 	assert.Equal(t, false, upgraded)
 
 	var response map[string]int
@@ -54,7 +58,28 @@ func TestIncrementOne(t *testing.T) {
 	assert.Equal(t, identifier, response["id"])
 }
 
-func TestIncrementTwo(t *testing.T) {
+func TestCreateIncrementSaveOnDbWithDefaultAmount(t *testing.T) {
+	defer tearDown()
+	setUp()
+
+	expectedDefaultAmount := 0
+
+	writer := httptest.NewRecorder()
+	req, err := http.NewRequest("POST", "/increment", nil)
+	app.CurrentApp.Engine.ServeHTTP(writer, req)
+
+	assert.Nil(t, err)
+	assert.Equal(t, 201, writer.Code)
+
+	var response map[string]int
+	json.Unmarshal([]byte(writer.Body.String()), &response)
+
+	var amount int
+	config.Connections.GetConnection().QueryRow("SELECT incremental FROM go_test WHERE id=$1", response["id"]).Scan(&amount)
+	assert.Equal(t, expectedDefaultAmount, amount)
+}
+
+func TestCreateManyIncrementsIncreaseId(t *testing.T) {
 	defer tearDown()
 	setUp()
 
@@ -78,6 +103,7 @@ func TestIncrementTwo(t *testing.T) {
 	var secondResponse map[string]int
 	json.Unmarshal([]byte(writer2.Body.String()), &secondResponse)
 
+	assert.NotEqual(t, firstResponse["id"], secondResponse["id"])
 
 	selectionDd, _ := config.Connections.GetConnection().Query("SELECT * FROM go_test")
 	for i:=0; selectionDd.Next() ; i++ {
@@ -85,7 +111,7 @@ func TestIncrementTwo(t *testing.T) {
 		var upgraded bool
 		selectionDd.Scan(&identifier, &amount, &upgraded)
 
-		assert.Equal(t, 1, amount)
+		assert.Equal(t, 0, amount)
 		assert.Equal(t, false, upgraded)
 		if i == 0 {
 			assert.Equal(t, identifier, firstResponse["id"])

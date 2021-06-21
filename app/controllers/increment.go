@@ -11,8 +11,18 @@ type IncrementsController interface {
 	Get(*gin.Context)
 }
 
+type asd struct {
+	amount int `bson:"amount"`
+}
+
 func CreateIncrement(c *gin.Context) {
-	createdId := services.CreateIncrease()
+	var body asd
+	err := c.ShouldBindJSON(&body)
+	if err != nil {
+		c.JSON(400, gin.H{"message": err.Error()})
+		return
+	}
+	createdId := services.CreateIncrease(body.amount)
 	c.JSON(201, gin.H{"id": createdId})
 }
 
@@ -27,7 +37,7 @@ func GetIncrement(c *gin.Context) {
 		c.JSON(400, gin.H{"message": "Invalid identifier"})
 		return
 	}
-	
+
 	value := services.GetIncrement(id)
 	if value == nil {
 		c.JSON(200, gin.H{})
