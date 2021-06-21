@@ -39,14 +39,14 @@ func GetAllIncrements() []models.Incremental {
 	return increments
 }
 
-func GetIncrement(id int) models.Incremental {
+func GetIncrement(id int) *models.Incremental {
 	db := config.Connections.GetConnection()
 	sqlStatement := `SELECT * FROM go_test WHERE id=$1`
 
-	var increment models.Incremental
+	increment := new(models.Incremental)
 	err := db.QueryRow(sqlStatement, id).Scan(&increment.Id, &increment.Amount)
 	if err != nil {
-		return models.Incremental{}
+		return nil
 	}
 
 	return increment

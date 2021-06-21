@@ -166,7 +166,7 @@ func TestGetIncrementByMissingIdReturnsEmpty(t *testing.T) {
 	assert.Equal(t, 200, writer.Code)
 
 	var response map[string]int
-	var expected []byte
+	expected := map[string]int{}
 	json.Unmarshal([]byte(writer.Body.String()), &response)
 
 	assert.Equal(t, expected, response)

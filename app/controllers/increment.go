@@ -27,6 +27,11 @@ func GetIncrement(c *gin.Context) {
 		c.JSON(400, gin.H{"message": "Invalid identifier"})
 		return
 	}
+	
 	value := services.GetIncrement(id)
+	if value == nil {
+		c.JSON(200, gin.H{})
+		return
+	}
 	c.JSON(200, value)
 }
