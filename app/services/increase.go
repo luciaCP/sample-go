@@ -31,7 +31,7 @@ func GetAllIncrements() []models.Incremental {
 	var increments []models.Incremental
 	for rows.Next(){
 		var oneIncrement models.Incremental
-		rows.Scan(&oneIncrement.Id, &oneIncrement.Amount)
+		rows.Scan(&oneIncrement.Id, &oneIncrement.Amount, &oneIncrement.Upgraded)
 
 		increments = append(increments, oneIncrement)
 	}
@@ -44,7 +44,9 @@ func GetIncrement(id int) *models.Incremental {
 	sqlStatement := `SELECT * FROM go_test WHERE id=$1`
 
 	increment := new(models.Incremental)
-	err := db.QueryRow(sqlStatement, id).Scan(&increment.Id, &increment.Amount)
+	err := db.QueryRow(sqlStatement, id).Scan(
+		&increment.Id, &increment.Amount, &increment.Upgraded,
+	)
 	if err != nil {
 		return nil
 	}

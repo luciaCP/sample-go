@@ -44,12 +44,14 @@ func TestIncrementOne(t *testing.T) {
 	assert.Equal(t, 201, writer.Code)
 
 	var identifier, amount int
-	config.Connections.GetConnection().QueryRow("SELECT id, incremental FROM go_test").Scan(&identifier, &amount)
+	var upgraded bool
+	config.Connections.GetConnection().QueryRow("SELECT * FROM go_test").Scan(&identifier, &amount, &upgraded)
 	assert.Equal(t, 1, amount)
+	assert.Equal(t, false, upgraded)
 
 	var response map[string]int
 	json.Unmarshal([]byte(writer.Body.String()), &response)
-	assert.Equal(t, response["id"], identifier)
+	assert.Equal(t, identifier, response["id"])
 }
 
 func TestIncrementTwo(t *testing.T) {
@@ -77,16 +79,18 @@ func TestIncrementTwo(t *testing.T) {
 	json.Unmarshal([]byte(writer2.Body.String()), &secondResponse)
 
 
-	selectionDd, _ := config.Connections.GetConnection().Query("SELECT id, incremental FROM go_test")
+	selectionDd, _ := config.Connections.GetConnection().Query("SELECT * FROM go_test")
 	for i:=0; selectionDd.Next() ; i++ {
 		var identifier, amount int
-		selectionDd.Scan(&identifier, &amount)
+		var upgraded bool
+		selectionDd.Scan(&identifier, &amount, &upgraded)
 
 		assert.Equal(t, 1, amount)
+		assert.Equal(t, false, upgraded)
 		if i == 0 {
-			assert.Equal(t, firstResponse["id"], identifier)
+			assert.Equal(t, identifier, firstResponse["id"])
 		} else {
-			assert.Equal(t, secondResponse["id"], identifier)
+			assert.Equal(t, identifier, secondResponse["id"])
 		}
 	}
 }
@@ -97,7 +101,7 @@ func TestGetAll(t *testing.T) {
 
 	db := config.Connections.GetConnection()
 	sqlStatement := `INSERT INTO go_test (incremental) VALUES (1) RETURNING id`
-	var firstId, secondId int
+	var firstId, secondId float64
 	db.QueryRow(sqlStatement).Scan(&firstId)
 	db.QueryRow(sqlStatement).Scan(&secondId)
 
@@ -107,13 +111,16 @@ func TestGetAll(t *testing.T) {
 
 	assert.Equal(t, 200, writer.Code)
 
-	var response [](map[string]int)
+	var response [](map[string]interface{})
 	json.Unmarshal([]byte(writer.Body.String()), &response)
 
 	assert.Equal(t, firstId, response[0]["id"])
-	assert.Equal(t, 1, response[0]["amount"])
+	assert.Equal(t, float64(1), response[0]["amount"].(float64))
+	assert.Equal(t, false, response[0]["upgraded"].(bool))
+
 	assert.Equal(t, secondId, response[1]["id"])
-	assert.Equal(t, 1, response[1]["amount"])
+	assert.Equal(t, float64(1), response[1]["amount"].(float64))
+	assert.Equal(t, false, response[1]["upgraded"].(bool))
 }
 
 func TestGetIncrementByIdReturnsIncrement(t *testing.T) {
@@ -122,20 +129,21 @@ func TestGetIncrementByIdReturnsIncrement(t *testing.T) {
 
 	db := config.Connections.GetConnection()
 	sqlStatement := `INSERT INTO go_test (incremental) VALUES (1) RETURNING id`
-	var firstId int
+	var firstId float64
 	db.QueryRow(sqlStatement).Scan(&firstId)
 
 	writer := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/increment/" +  strconv.Itoa(firstId), nil)
+	req, _ := http.NewRequest("GET", "/increment/" +  strconv.Itoa(int(firstId)), nil)
 	app.CurrentApp.Engine.ServeHTTP(writer, req)
 
 	assert.Equal(t, 200, writer.Code)
 
-	var response map[string]int
+	var response map[string]interface{}
 	json.Unmarshal([]byte(writer.Body.String()), &response)
 
 	assert.Equal(t, firstId, response["id"])
-	assert.Equal(t, 1, response["amount"])
+	assert.Equal(t, float64(1), response["amount"].(float64))
+	assert.Equal(t, false, response["upgraded"].(bool))
 }
 
 func TestGetIncrementWithInvalidIdReturnsBadRequest(t *testing.T) {
