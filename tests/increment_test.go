@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"sample-go/app"
 	"sample-go/app/config"
+	"strconv"
 	"testing"
 )
 
@@ -115,3 +116,58 @@ func TestGetAll(t *testing.T) {
 	assert.Equal(t, 1, response[1]["amount"])
 }
 
+func TestGetIncrementByIdReturnsIncrement(t *testing.T) {
+	defer tearDown()
+	setUp()
+
+	db := config.Connections.GetConnection()
+	sqlStatement := `INSERT INTO go_test (incremental) VALUES (1) RETURNING id`
+	var firstId int
+	db.QueryRow(sqlStatement).Scan(&firstId)
+
+	writer := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/increment/" +  strconv.Itoa(firstId), nil)
+	app.CurrentApp.Engine.ServeHTTP(writer, req)
+
+	assert.Equal(t, 200, writer.Code)
+
+	var response [](map[string]int)
+	json.Unmarshal([]byte(writer.Body.String()), &response)
+
+	assert.Equal(t, firstId, response[0]["id"])
+	assert.Equal(t, 1, response[0]["amount"])
+}
+
+func TestGetIncrementWithInvalidIdReturnsBadRequest(t *testing.T) {
+	defer tearDown()
+	setUp()
+
+	writer := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/increment/missing", nil)
+	app.CurrentApp.Engine.ServeHTTP(writer, req)
+
+	assert.Equal(t, 400, writer.Code)
+
+	var response map[string]string
+	expected := []byte(`{"Message":"Invalid identifier"}`)
+	json.Unmarshal([]byte(writer.Body.String()), &response)
+
+	assert.Equal(t, expected, response)
+}
+
+func TestGetIncrementByMissingIdReturnsEmpty(t *testing.T) {
+	defer tearDown()
+	setUp()
+
+	writer := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/increment/1", nil)
+	app.CurrentApp.Engine.ServeHTTP(writer, req)
+
+	assert.Equal(t, 200, writer.Code)
+
+	var response map[string]int
+	var expected []byte
+	json.Unmarshal([]byte(writer.Body.String()), &response)
+
+	assert.Equal(t, expected, response)
+}
