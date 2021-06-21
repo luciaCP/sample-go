@@ -109,7 +109,9 @@ func TestGetAll(t *testing.T) {
 	var response [](map[string]int)
 	json.Unmarshal([]byte(writer.Body.String()), &response)
 
-	assert.Equal(t, firstId, response[0]["Id"])
-	assert.Equal(t, secondId, response[1]["Id"])
+	assert.Equal(t, firstId, response[0]["id"])
+	assert.Equal(t, 1, response[0]["amount"])
+	assert.Equal(t, secondId, response[1]["id"])
+	assert.Equal(t, 1, response[1]["amount"])
 }
 

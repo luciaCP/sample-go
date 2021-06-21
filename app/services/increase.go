@@ -2,14 +2,10 @@ package services
 
 import (
 	"sample-go/app/config"
+	"sample-go/app/models"
 )
 
-type incrementalDto struct {
-	Id int
-	Incremental int
-}
-
-func Increase() int {
+func CreateIncrease() int {
 	db := config.Connections.GetConnection()
 	sqlStatement := `
 		INSERT INTO go_test (incremental)
@@ -24,3 +20,21 @@ func Increase() int {
 	return id
 }
 
+func GetAllIncrements() []models.Incremental {
+	db := config.Connections.GetConnection()
+	sqlStatement := `SELECT * FROM go_test`
+	rows, err := db.Query(sqlStatement)
+	if err != nil {
+		panic(err)
+	}
+
+	var increments []models.Incremental
+	for rows.Next(){
+		var oneIncrement models.Incremental
+		rows.Scan(&oneIncrement.Id, &oneIncrement.Amount)
+
+		increments = append(increments, oneIncrement)
+	}
+
+	return increments
+}
