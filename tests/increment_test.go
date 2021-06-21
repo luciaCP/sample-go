@@ -149,7 +149,7 @@ func TestGetIncrementWithInvalidIdReturnsBadRequest(t *testing.T) {
 	assert.Equal(t, 400, writer.Code)
 
 	var response map[string]string
-	expected := []byte(`{"Message":"Invalid identifier"}`)
+	expected := map[string]string{"message":"Invalid identifier"}
 	json.Unmarshal([]byte(writer.Body.String()), &response)
 
 	assert.Equal(t, expected, response)

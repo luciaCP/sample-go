@@ -22,7 +22,11 @@ func GetAllIncrements(c *gin.Context) {
 }
 
 func GetIncrement(c *gin.Context) {
-	id, _ := strconv.Atoi(c.Param("id"))
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(400, gin.H{"message": "Invalid identifier"})
+		return
+	}
 	value := services.GetIncrement(id)
 	c.JSON(200, value)
 }
