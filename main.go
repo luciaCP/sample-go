@@ -11,7 +11,7 @@ import (
 func main() {
 	app.CurrentApp.InitServer()
 
-	config.Connections.InitDb("postgresql://postgres@0.0.0.0:5432/go_test?sslmode=disable")
+	config.Connections.InitDb("postgresql://postgres@0.0.0.0:5432", "sample_go")
 
 	err := app.CurrentApp.Run(":8080")
 	if err != nil {

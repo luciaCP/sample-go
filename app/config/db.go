@@ -8,20 +8,24 @@ import (
 )
 
 type ConfigApp struct {
-	db *sql.DB
+	db     *sql.DB
+	dbName string
 }
 
 var Connections = ConfigApp{}
 
-func (config *ConfigApp) InitDb(uriDB string) {
+func (config *ConfigApp) InitDb(uriDB string, dbName string) {
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println("Chan!! Had to recover from panic on init DB - ", r)
 		}
 	}()
+	if dbName == "" {
+		dbName = "go_test"
+	}
 	db, err := sql.Open(
 		"postgres",
-		uriDB,
+		uriDB + "/" + dbName + "?sslmode=disable",
 	)
 
 	if err != nil || db.Ping() != nil {
@@ -33,6 +37,7 @@ func (config *ConfigApp) InitDb(uriDB string) {
 	}
 
 	config.db = db
+	config.dbName = dbName
 }
 
 func (config *ConfigApp) GetConnection() *sql.DB {

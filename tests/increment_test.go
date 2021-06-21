@@ -13,7 +13,7 @@ import (
 
 func TestMain(m *testing.M)  {
 	app.CurrentApp.InitServer()
-	config.Connections.InitDb("postgresql://postgres@0.0.0.0:5432/go_test?sslmode=disable")
+	config.Connections.InitDb("postgresql://postgres@0.0.0.0:5432", "db_test")
 	m.Run()
 }
 
@@ -89,3 +89,27 @@ func TestIncrementTwo(t *testing.T) {
 		}
 	}
 }
+
+func TestGetAll(t *testing.T) {
+	defer tearDown()
+	setUp()
+
+	db := config.Connections.GetConnection()
+	sqlStatement := `INSERT INTO go_test (incremental) VALUES (1) RETURNING id`
+	var firstId, secondId int
+	db.QueryRow(sqlStatement).Scan(&firstId)
+	db.QueryRow(sqlStatement).Scan(&secondId)
+
+	writer := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/increment", nil)
+	app.CurrentApp.Engine.ServeHTTP(writer, req)
+
+	assert.Equal(t, 200, writer.Code)
+
+	var response [](map[string]int)
+	json.Unmarshal([]byte(writer.Body.String()), &response)
+
+	assert.Equal(t, firstId, response[0]["Id"])
+	assert.Equal(t, secondId, response[1]["Id"])
+}
+
