@@ -131,11 +131,11 @@ func TestGetIncrementByIdReturnsIncrement(t *testing.T) {
 
 	assert.Equal(t, 200, writer.Code)
 
-	var response [](map[string]int)
+	var response map[string]int
 	json.Unmarshal([]byte(writer.Body.String()), &response)
 
-	assert.Equal(t, firstId, response[0]["id"])
-	assert.Equal(t, 1, response[0]["amount"])
+	assert.Equal(t, firstId, response["id"])
+	assert.Equal(t, 1, response["amount"])
 }
 
 func TestGetIncrementWithInvalidIdReturnsBadRequest(t *testing.T) {

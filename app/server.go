@@ -17,6 +17,8 @@ func (app *App) InitServer() {
 	engine.POST("/increment", controllers.CreateIncrement)
 	engine.GET("/increment", controllers.GetAllIncrements)
 
+	engine.GET("/increment/:id", controllers.GetIncrement)
+
 	app.Engine = engine
 }
 
