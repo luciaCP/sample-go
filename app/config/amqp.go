@@ -19,29 +19,23 @@ type AmqpBroker struct {
 var localBroker = AmqpBroker{}
 
 func (broker *AmqpBroker) InitAmqpChannel(amqpServerURL string) {
-	// Create a new RabbitMQ connection.
 	connectRabbitMQ, err := amqp.Dial(amqpServerURL)
 	if err != nil {
 		panic(err)
 	}
 
-	// Let's start by opening a channel to our RabbitMQ
-	// instance over the connection we have already
-	// established.
 	channelRabbitMQ, err := connectRabbitMQ.Channel()
 	if err != nil {
 		panic(err)
 	}
 
-	// With the instance and declare Queues that we can
-	// publish and subscribe to.
 	_, err = channelRabbitMQ.QueueDeclare(
-		"QueueService1", // queue name
-		true,            // durable
-		false,           // auto delete
-		false,           // exclusive
-		false,           // no wait
-		nil,             // arguments
+		NotifyQueue, // queue name
+		true,
+		false,
+		false,
+		false,
+		nil,
 	)
 	if err != nil {
 		panic(err)
@@ -57,7 +51,6 @@ func (broker *AmqpBroker) Publish(queue, body string) error {
 		Body:        []byte(body),
 	}
 
-	// Attempt to publish a message to the queue.
 	err := localBroker.amqpChannel.Publish(
 		"",
 		queue,

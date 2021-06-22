@@ -18,7 +18,7 @@ func CreateIncrease() int {
 		panic(err)
 	}
 
-	err = config.Connections.Amqp.Publish("QueueService1", fmt.Sprintf("New increase model %d", id))
+	err = config.Connections.Amqp.Publish(config.NotifyQueue, fmt.Sprintf("%d", id))
 	if err != nil {
 		fmt.Println("Error when send to queue " + err.Error())
 	}
