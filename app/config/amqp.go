@@ -11,14 +11,14 @@ type AmqpConnection interface {
 	CloseAmqp()
 }
 
-type broker struct {
+type AmqpBroker struct {
 	amqpCnx     *amqp.Connection
 	amqpChannel *amqp.Channel
 }
 
-var localBroker = broker{}
+var localBroker = AmqpBroker{}
 
-func (config *ConfigApp) InitAmqpChannel(amqpServerURL string) {
+func (broker *AmqpBroker) InitAmqpChannel(amqpServerURL string) {
 	// Create a new RabbitMQ connection.
 	connectRabbitMQ, err := amqp.Dial(amqpServerURL)
 	if err != nil {
@@ -51,7 +51,7 @@ func (config *ConfigApp) InitAmqpChannel(amqpServerURL string) {
 	localBroker.amqpChannel = channelRabbitMQ
 }
 
-func (config *ConfigApp) Publish(queue, body string) error {
+func (broker *AmqpBroker) Publish(queue, body string) error {
 	message := amqp.Publishing{
 		ContentType: "text/plain",
 		Body:        []byte(body),
@@ -72,13 +72,11 @@ func (config *ConfigApp) Publish(queue, body string) error {
 	return nil
 }
 
-
-
-func (config *ConfigApp) GetAmqpChannel() *amqp.Channel {
+func (broker *AmqpBroker) GetAmqpChannel() *amqp.Channel {
 	return localBroker.amqpChannel
 }
 
-func (config *ConfigApp) CloseAmqp() {
+func (broker *AmqpBroker) CloseAmqp() {
 	localBroker.amqpChannel.Close()
 	localBroker.amqpCnx.Close()
 }

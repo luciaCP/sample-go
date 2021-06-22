@@ -13,5 +13,5 @@ var Connections = ConfigApp{}
 
 func (config *ConfigApp) Close() {
 	config.CloseDb()
-	config.CloseAmqp()
+	config.Amqp.CloseAmqp()
 }
