@@ -9,7 +9,9 @@ type ConfigApp struct {
 	Amqp AmqpConnection
 }
 
-var Connections = ConfigApp{}
+var Connections = ConfigApp{
+	Amqp: &AmqpBroker{},
+}
 
 func (config *ConfigApp) Close() {
 	config.CloseDb()
