@@ -1,11 +1,17 @@
 package config
 
-import "database/sql"
+import (
+	"database/sql"
+)
 
 type ConfigApp struct {
-	db     *sql.DB
-	dbName string
+	db   *sql.DB
+	Amqp AmqpConnection
 }
 
 var Connections = ConfigApp{}
 
+func (config *ConfigApp) CloseConfig() {
+	config.Close()
+	config.CloseAmqp()
+}
