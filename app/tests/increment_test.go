@@ -6,8 +6,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
-	"sample-go/app/config"
 	"sample-go/app/server"
+	config2 "sample-go/config"
 	"strconv"
 	"testing"
 )
@@ -16,14 +16,14 @@ var mockAmqp = &MockAmqp{}
 
 func TestMain(m *testing.M)  {
 	server.CurrentApp.InitServer()
-	config.Connections.InitDb("postgresql://postgres@0.0.0.0:5432", "db_test")
-	config.Connections.Amqp = mockAmqp
+	config2.Connections.InitDb("postgresql://postgres@0.0.0.0:5432", "db_test")
+	config2.Connections.Amqp = mockAmqp
 
 	m.Run()
 }
 
 func setUp() {
-	err := config.Connections.RestoreDb()
+	err := config2.Connections.RestoreDb()
 	mockAmqp.Clean()
 
 	if err != nil {
@@ -32,7 +32,7 @@ func setUp() {
 }
 
 func tearDown() {
-	err := config.Connections.FlushDb()
+	err := config2.Connections.FlushDb()
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -51,7 +51,7 @@ func TestIncrementOne(t *testing.T) {
 
 	var identifier, amount int
 	var upgraded bool
-	config.Connections.GetDbConnection().QueryRow("SELECT * FROM go_test").Scan(&identifier, &amount, &upgraded)
+	config2.Connections.GetDbConnection().QueryRow("SELECT * FROM go_test").Scan(&identifier, &amount, &upgraded)
 	assert.Equal(t, 1, amount)
 	assert.Equal(t, false, upgraded)
 
@@ -88,7 +88,7 @@ func TestIncrementTwo(t *testing.T) {
 	var secondResponse map[string]int
 	json.Unmarshal([]byte(writer2.Body.String()), &secondResponse)
 
-	selectionDd, _ := config.Connections.GetDbConnection().Query("SELECT * FROM go_test")
+	selectionDd, _ := config2.Connections.GetDbConnection().Query("SELECT * FROM go_test")
 	for i:=0; selectionDd.Next() ; i++ {
 		var identifier, amount int
 		var upgraded bool
@@ -108,7 +108,7 @@ func TestGetAll(t *testing.T) {
 	defer tearDown()
 	setUp()
 
-	db := config.Connections.GetDbConnection()
+	db := config2.Connections.GetDbConnection()
 	sqlStatement := `INSERT INTO go_test (incremental) VALUES (1) RETURNING id`
 	var firstId, secondId float64
 	db.QueryRow(sqlStatement).Scan(&firstId)
@@ -138,7 +138,7 @@ func TestGetIncrementByIdReturnsIncrement(t *testing.T) {
 	defer tearDown()
 	setUp()
 
-	db := config.Connections.GetDbConnection()
+	db := config2.Connections.GetDbConnection()
 	sqlStatement := `INSERT INTO go_test (incremental) VALUES (1) RETURNING id`
 	var firstId float64
 	db.QueryRow(sqlStatement).Scan(&firstId)

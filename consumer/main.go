@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/streadway/amqp"
 	"log"
+	"sample-go/config"
 	"sample-go/consumer/callbacks"
-	"sample-go/consumer/config"
 )
 
 func main() {

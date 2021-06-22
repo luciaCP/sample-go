@@ -2,7 +2,7 @@ package callbacks
 
 import (
 	"log"
-	"sample-go/consumer/config"
+	"sample-go/config"
 )
 
 func Interpret(id string) {

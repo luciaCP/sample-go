@@ -19,7 +19,3 @@ func (mock *MockAmqp) GetAmqpChannel() *amqp.Channel {
 
 func (config *MockAmqp) CloseAmqp() {
 }
-
-func (config *MockAmqp) PublishMockMessage(message string) {
-
-}

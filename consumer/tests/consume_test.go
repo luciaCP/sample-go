@@ -3,8 +3,8 @@ package tests
 import (
 	"fmt"
 	"github.com/stretchr/testify/assert"
+	"sample-go/config"
 	"sample-go/consumer/callbacks"
-	"sample-go/consumer/config"
 	"testing"
 )
 
