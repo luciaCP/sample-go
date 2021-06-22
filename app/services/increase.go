@@ -1,12 +1,13 @@
 package services
 
 import (
+	"fmt"
 	"sample-go/app/config"
 	"sample-go/app/models"
 )
 
 func CreateIncrease() int {
-	db := config.Connections.GetConnection()
+	db := config.Connections.GetDbConnection()
 	sqlStatement := `
 		INSERT INTO go_test (incremental)
 		VALUES ($1)
@@ -17,11 +18,15 @@ func CreateIncrease() int {
 		panic(err)
 	}
 
+	err = config.Connections.Amqp.Publish("QueueService1", fmt.Sprintf("New increase model %d", id))
+	if err != nil {
+		fmt.Println("Error when send to queue " + err.Error())
+	}
 	return id
 }
 
 func GetAllIncrements() []models.Incremental {
-	db := config.Connections.GetConnection()
+	db := config.Connections.GetDbConnection()
 	sqlStatement := `SELECT * FROM go_test`
 	rows, err := db.Query(sqlStatement)
 	if err != nil {
@@ -40,7 +45,7 @@ func GetAllIncrements() []models.Incremental {
 }
 
 func GetIncrement(id int) *models.Incremental {
-	db := config.Connections.GetConnection()
+	db := config.Connections.GetDbConnection()
 	sqlStatement := `SELECT * FROM go_test WHERE id=$1`
 
 	increment := new(models.Incremental)

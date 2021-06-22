@@ -11,7 +11,7 @@ type ConfigApp struct {
 
 var Connections = ConfigApp{}
 
-func (config *ConfigApp) CloseConfig() {
-	config.Close()
+func (config *ConfigApp) Close() {
+	config.CloseDb()
 	config.CloseAmqp()
 }

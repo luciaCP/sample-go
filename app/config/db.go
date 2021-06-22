@@ -9,10 +9,10 @@ import (
 
 type DbConnection interface {
 	InitDb(uriDB string, dbName string)
-	GetConnection() *sql.DB
+	GetDbConnection() *sql.DB
 	FlushDb() error
 	RestoreDb() error
-	Close() error
+	CloseDb() error
 }
 
 func (config *ConfigApp) InitDb(uriDB string, dbName string) {
@@ -38,10 +38,9 @@ func (config *ConfigApp) InitDb(uriDB string, dbName string) {
 	}
 
 	config.db = db
-	config.dbName = dbName
 }
 
-func (config *ConfigApp) GetConnection() *sql.DB {
+func (config *ConfigApp) GetDbConnection() *sql.DB {
 	return config.db
 }
 
@@ -63,7 +62,7 @@ func (config *ConfigApp) RestoreDb() error {
 	return migrate.Up(config.db)
 }
 
-func (config *ConfigApp) Close() error {
+func (config *ConfigApp) CloseDb() error {
 	migrate.Down(config.db)
 	return config.db.Close()
 }
