@@ -7,9 +7,9 @@ Run **app** with
 
 `go mod tidy`
 
-`go run <path>/main.go`
+`go run <path>/app/main.go`
 
-tests `go test <path>/sample-go/tests`
+tests `go test <path>/sample-go/app/tests`
 
 
 Run **consumer** with

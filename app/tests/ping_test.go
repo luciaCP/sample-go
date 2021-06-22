@@ -4,16 +4,16 @@ import (
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
-	"sample-go/app"
+	"sample-go/app/server"
 	"testing"
 )
 
 func TestPing(t *testing.T)  {
-	app.CurrentApp.InitServer()
+	server.CurrentApp.InitServer()
 
 	writer := httptest.NewRecorder()
 	req, err := http.NewRequest("GET", "/ping", nil)
-	app.CurrentApp.Engine.ServeHTTP(writer, req)
+	server.CurrentApp.Engine.ServeHTTP(writer, req)
 
 	assert.Nil(t, err)
 	assert.Equal(t, 200, writer.Code)

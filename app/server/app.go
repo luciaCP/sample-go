@@ -1,3 +1,3 @@
-package app
+package server
 
 var CurrentApp = App{}

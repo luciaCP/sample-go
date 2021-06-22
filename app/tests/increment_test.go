@@ -6,8 +6,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
-	"sample-go/app"
 	"sample-go/app/config"
+	"sample-go/app/server"
 	"strconv"
 	"testing"
 )
@@ -15,7 +15,7 @@ import (
 var mockAmqp = &MockAmqp{}
 
 func TestMain(m *testing.M)  {
-	app.CurrentApp.InitServer()
+	server.CurrentApp.InitServer()
 	config.Connections.InitDb("postgresql://postgres@0.0.0.0:5432", "db_test")
 	config.Connections.Amqp = mockAmqp
 
@@ -44,7 +44,7 @@ func TestIncrementOne(t *testing.T) {
 
 	writer := httptest.NewRecorder()
 	req, err := http.NewRequest("POST", "/increment", nil)
-	app.CurrentApp.Engine.ServeHTTP(writer, req)
+	server.CurrentApp.Engine.ServeHTTP(writer, req)
 
 	assert.Nil(t, err)
 	assert.Equal(t, 201, writer.Code)
@@ -68,7 +68,7 @@ func TestIncrementTwo(t *testing.T) {
 
 	writer := httptest.NewRecorder()
 	req, err := http.NewRequest("POST", "/increment", nil)
-	app.CurrentApp.Engine.ServeHTTP(writer, req)
+	server.CurrentApp.Engine.ServeHTTP(writer, req)
 
 	assert.Nil(t, err)
 	assert.Equal(t, 201, writer.Code)
@@ -79,7 +79,7 @@ func TestIncrementTwo(t *testing.T) {
 
 	writer2 := httptest.NewRecorder()
 	req, err = http.NewRequest("POST", "/increment", nil)
-	app.CurrentApp.Engine.ServeHTTP(writer2, req)
+	server.CurrentApp.Engine.ServeHTTP(writer2, req)
 
 	assert.Nil(t, err)
 	assert.Equal(t, 201, writer2.Code)
@@ -116,7 +116,7 @@ func TestGetAll(t *testing.T) {
 
 	writer := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/increment", nil)
-	app.CurrentApp.Engine.ServeHTTP(writer, req)
+	server.CurrentApp.Engine.ServeHTTP(writer, req)
 
 	assert.Equal(t, 200, writer.Code)
 
@@ -145,7 +145,7 @@ func TestGetIncrementByIdReturnsIncrement(t *testing.T) {
 
 	writer := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/increment/" +  strconv.Itoa(int(firstId)), nil)
-	app.CurrentApp.Engine.ServeHTTP(writer, req)
+	server.CurrentApp.Engine.ServeHTTP(writer, req)
 
 	assert.Equal(t, 200, writer.Code)
 
@@ -163,7 +163,7 @@ func TestGetIncrementWithInvalidIdReturnsBadRequest(t *testing.T) {
 
 	writer := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/increment/missing", nil)
-	app.CurrentApp.Engine.ServeHTTP(writer, req)
+	server.CurrentApp.Engine.ServeHTTP(writer, req)
 
 	assert.Equal(t, 400, writer.Code)
 
@@ -180,7 +180,7 @@ func TestGetIncrementByMissingIdReturnsEmpty(t *testing.T) {
 
 	writer := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/increment/1", nil)
-	app.CurrentApp.Engine.ServeHTTP(writer, req)
+	server.CurrentApp.Engine.ServeHTTP(writer, req)
 
 	assert.Equal(t, 200, writer.Code)
 
